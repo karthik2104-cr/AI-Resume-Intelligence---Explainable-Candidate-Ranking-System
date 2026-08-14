@@ -1,0 +1,26 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\resume-screening project\v2
+configfile: pyproject.toml
+plugins: anyio-4.14.2, cov-7.1.0
+collected 209 items
+
+tests\integration\test_parsing_pipeline.py ...                           [  1%]
+tests\integration\test_resume_jd_compatibility.py .                      [  1%]
+tests\integration\test_skill_gap_pipeline.py .                           [  2%]
+tests\unit\test_config.py ....                                           [  4%]
+tests\unit\test_contact_extractor.py ...                                 [  5%]
+tests\unit\test_entity_and_skill_gap.py ......................           [ 16%]
+tests\unit\test_entry_extractors.py ......                               [ 19%]
+tests\unit\test_ingestion.py ..........................                  [ 31%]
+tests\unit\test_ingestion_helpers.py ..                                  [ 32%]
+tests\unit\test_job_parser.py ..................                         [ 41%]
+tests\unit\test_phase6_entity_intelligence.py .......................... [ 53%]
+...........................................................              [ 81%]
+tests\unit\test_resume_parser.py ............                            [ 87%]
+tests\unit\test_section_patterns.py ....                                 [ 89%]
+tests\unit\test_skill_normalizer.py .....                                [ 91%]
+tests\unit\test_text_cleaner.py .....                                    [ 94%]
+tests\unit\test_tfidf_baseline.py ............                           [100%]
+
+============================= 209 passed in 5.98s =============================

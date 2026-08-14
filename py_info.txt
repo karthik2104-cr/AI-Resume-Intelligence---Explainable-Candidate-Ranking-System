@@ -1,0 +1,2 @@
+﻿C:\resume-screening project\v2\.venv\bin\python.exe
+['', 'C:\\msys64\\mingw64\\lib\\python310.zip', 'C:\\msys64\\mingw64\\lib\\python3.10', 'C:\\msys64\\mingw64\\lib\\python3.10\\lib-dynload', 'C:\\resume-screening project\\v2', 'C:\\resume-screening project\\v2\\.venv\\lib\\python3.10\\site-packages']

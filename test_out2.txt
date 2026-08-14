@@ -1,0 +1,26 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.10, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\resume-screening project\v2
+configfile: pyproject.toml
+collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+_______ ERROR collecting tests/unit/test_phase6_entity_intelligence.py ________
+ImportError while importing test module 'C:\resume-screening project\v2\tests\unit\test_phase6_entity_intelligence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\msys64\mingw64\lib\python3.10\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\unit\test_phase6_entity_intelligence.py:27: in <module>
+    from src.extraction.entity_extractor import EntityExtractor
+src\extraction\__init__.py:1: in <module>
+    from src.extraction.entity_extractor import EntityExtractor
+src\extraction\entity_extractor.py:5: in <module>
+    from src.extraction.skill_normalizer import (
+src\extraction\skill_normalizer.py:10: in <module>
+    import yaml
+E   ModuleNotFoundError: No module named 'yaml'
+=========================== short test summary info ===========================
+ERROR tests/unit/test_phase6_entity_intelligence.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.20s ===============================

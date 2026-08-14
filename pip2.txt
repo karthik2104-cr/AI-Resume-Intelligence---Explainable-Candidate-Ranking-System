@@ -1,0 +1,193 @@
+﻿Collecting pyyaml
+  Using cached pyyaml-6.0.3.tar.gz (130 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting pydantic
+  Using cached pydantic-2.13.4-py3-none-any.whl (472 kB)
+Collecting scikit-learn
+  Using cached scikit_learn-1.7.2.tar.gz (7.2 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'error'
+  error: subprocess-exited-with-error
+  
+  pip subprocess to install build dependencies did not run successfully.
+  exit code: 1
+  
+  [159 lines of output]
+  Collecting meson-python<0.19.0,>=0.16.0
+    Using cached meson_python-0.18.0-py3-none-any.whl (28 kB)
+  Collecting Cython<3.2.0,>=3.0.10
+    Using cached cython-3.1.8-py3-none-any.whl (1.2 MB)
+  Collecting numpy<2.4.0,>=2
+    Using cached numpy-2.2.6.tar.gz (20.3 MB)
+    Installing build dependencies: started
+    Installing build dependencies: finished with status 'done'
+    Getting requirements to build wheel: started
+    Getting requirements to build wheel: finished with status 'done'
+    Installing backend dependencies: started
+    Installing backend dependencies: finished with status 'error'
+    error: subprocess-exited-with-error
+  
+    pip subprocess to install backend dependencies did not run successfully.
+    exit code: 1
+  
+    [127 lines of output]
+    Collecting ninja>=1.8.2
+      Using cached ninja-1.13.0.tar.gz (242 kB)
+      Installing build dependencies: started
+      Installing build dependencies: finished with status 'done'
+      Getting requirements to build wheel: started
+      Getting requirements to build wheel: finished with status 'done'
+      Installing backend dependencies: started
+      Installing backend dependencies: finished with status 'error'
+      error: subprocess-exited-with-error
+  
+      pip subprocess to install backend dependencies did not run successfully.
+      exit code: 1
+  
+      [99 lines of output]
+      Collecting setuptools-scm
+        Using cached setuptools_scm-10.2.1-py3-none-any.whl (29 kB)
+      Collecting hatch-fancy-pypi-readme>=23.2
+        Using cached hatch_fancy_pypi_readme-25.1.0-py3-none-any.whl (10 kB)
+      Collecting cmake>=3.15
+        Using cached cmake-4.4.2.tar.gz (34 kB)
+        Installing build dependencies: started
+        Installing build dependencies: finished with status 'done'
+        Getting requirements to build wheel: started
+        Getting requirements to build wheel: finished with status 'done'
+        Preparing metadata (pyproject.toml): started
+        Preparing metadata (pyproject.toml): finished with status 'done'
+      Collecting packaging>=20
+        Using cached packaging-26.3-py3-none-any.whl (129 kB)
+      Collecting setuptools
+        Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+      Collecting vcs-versioning<3,>=2.0.0.dev0
+        Using cached vcs_versioning-2.2.4-py3-none-any.whl (109 kB)
+      Collecting tomli>=1
+        Using cached tomli-2.4.1-py3-none-any.whl (14 kB)
+      Collecting typing-extensions>=4.1
+        Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+      Collecting hatchling
+        Using cached hatchling-1.32.0-py3-none-any.whl (78 kB)
+      Collecting trove-classifiers
+        Using cached trove_classifiers-2026.6.1.19-py3-none-any.whl (14 kB)
+      Collecting pathspec>=0.10.1
+        Using cached pathspec-1.1.1-py3-none-any.whl (57 kB)
+      Collecting tomlkit>=0.11.1
+        Using cached tomlkit-0.15.1-py3-none-any.whl (49 kB)
+      Collecting pluggy>=1.0.0
+        Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+      Building wheels for collected packages: cmake
+        Building wheel for cmake (pyproject.toml): started
+        Building wheel for cmake (pyproject.toml): finished with status 'error'
+        error: subprocess-exited-with-error
+  
+        Building wheel for cmake (pyproject.toml) did not run successfully.
+        exit code: 1
+  
+        [49 lines of output]
+        Traceback (most recent call last):
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 1348, in do_open
+            h.request(req.get_method(), req.selector, req.data, headers,
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 1282, in request
+            self._send_request(method, url, body, headers, encode_chunked)
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 1328, in _send_request
+            self.endheaders(body, encode_chunked=encode_chunked)
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 1277, in endheaders
+            self._send_output(message_body, encode_chunked=encode_chunked)
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 1037, in _send_output
+            self.send(msg)
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 975, in send
+            self.connect()
+          File "C:\msys64\mingw64\lib\python3.10\http\client.py", line 1454, in connect
+            self.sock = self._context.wrap_socket(self.sock,
+          File "C:\msys64\mingw64\lib\python3.10\ssl.py", line 513, in wrap_socket
+            return self.sslsocket_class._create(
+          File "C:\msys64\mingw64\lib\python3.10\ssl.py", line 1071, in _create
+            self.do_handshake()
+          File "C:\msys64\mingw64\lib\python3.10\ssl.py", line 1342, in do_handshake
+            self._sslobj.do_handshake()
+        ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:997)
+  
+        During handling of the above exception, another exception occurred:
+  
+        Traceback (most recent call last):
+          File "C:\resume-screening project\v2\.venv\lib\python3.10\site-packages\pip\_vendor\pep517\in_process\_in_process.py", line 351, in <module>
+            main()
+          File "C:\resume-screening project\v2\.venv\lib\python3.10\site-packages\pip\_vendor\pep517\in_process\_in_process.py", line 333, in main
+            json_out['return_val'] = hook(**hook_input['kwargs'])
+          File "C:\resume-screening project\v2\.venv\lib\python3.10\site-packages\pip\_vendor\pep517\in_process\_in_process.py", line 249, in build_wheel
+            return _build_backend().build_wheel(wheel_directory, config_settings,
+          File "C:\Users\Karthick\AppData\Local\Temp\pip-install-pv_9mapa\cmake_4f3a469dad144dc5a0638ed2a90d1878\_build_backend\backend.py", line 156, in build_wheel
+            cmake_path = _bootstrap_build(temp_path, config_settings)
+          File "C:\Users\Karthick\AppData\Local\Temp\pip-install-pv_9mapa\cmake_4f3a469dad144dc5a0638ed2a90d1878\_build_backend\backend.py", line 103, in _bootstrap_build
+            with urllib.request.urlopen(archive_url) as response:
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 216, in urlopen
+            return opener.open(url, data, timeout)
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 519, in open
+            response = self._open(req, data)
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 536, in _open
+            result = self._call_chain(self.handle_open, protocol, protocol +
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 496, in _call_chain
+            result = func(*args)
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 1391, in https_open
+            return self.do_open(http.client.HTTPSConnection, req,
+          File "C:\msys64\mingw64\lib\python3.10\urllib\request.py", line 1351, in do_open
+            raise URLError(err)
+        urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:997)>
+        [end of output]
+  
+        note: This error originates from a subprocess, and is likely not a problem with pip.
+        ERROR: Failed building wheel for cmake
+      Failed to build cmake
+      ERROR: Could not build wheels for cmake, which is required to install pyproject.toml-based projects
+  
+      [notice] A new release of pip available: 22.3.1 -> 26.2.1
+      [notice] To update, run: C:\resume-screening project\v2\.venv\bin\python.exe -m pip install --upgrade pip
+      [end of output]
+  
+      note: This error originates from a subprocess, and is likely not a problem with pip.
+    error: subprocess-exited-with-error
+  
+    pip subprocess to install backend dependencies did not run successfully.
+    exit code: 1
+  
+    See above for output.
+  
+    note: This error originates from a subprocess, and is likely not a problem with pip.
+  
+    [notice] A new release of pip available: 22.3.1 -> 26.2.1
+    [notice] To update, run: C:\resume-screening project\v2\.venv\bin\python.exe -m pip install --upgrade pip
+    [end of output]
+  
+    note: This error originates from a subprocess, and is likely not a problem with pip.
+  error: subprocess-exited-with-error
+  
+  pip subprocess to install backend dependencies did not run successfully.
+  exit code: 1
+  
+  See above for output.
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  
+  [notice] A new release of pip available: 22.3.1 -> 26.2.1
+  [notice] To update, run: C:\resume-screening project\v2\.venv\bin\python.exe -m pip install --upgrade pip
+  [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+error: subprocess-exited-with-error
+System.Management.Automation.RemoteException
+pip subprocess to install build dependencies did not run successfully.
+exit code: 1
+System.Management.Automation.RemoteException
+See above for output.
+System.Management.Automation.RemoteException
+note: This error originates from a subprocess, and is likely not a problem with pip.
+System.Management.Automation.RemoteException
+[notice] A new release of pip available: 22.3.1 -> 26.2.1
+[notice] To update, run: C:\resume-screening project\v2\.venv\bin\python.exe -m pip install --upgrade pip

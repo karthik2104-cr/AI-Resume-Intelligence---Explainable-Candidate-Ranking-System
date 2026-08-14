@@ -1,0 +1,93 @@
+# AI Resume Intelligence V2 — Application Configuration
+# Override via environment variables where noted (see src/utils/config.py).
+
+app:
+  name: "AI Resume Intelligence & Explainable Candidate Ranking System"
+  version: "2.0.0"
+  environment: "development"  # development | staging | production
+
+paths:
+  artifacts_dir: "artifacts"
+  data_raw_dir: "data/raw"
+  data_processed_dir: "data/processed"
+  data_evaluation_dir: "data/evaluation"
+  experiments_dir: "artifacts/experiments"
+
+ingestion:
+  allowed_extensions: [".pdf", ".docx", ".txt"]
+  max_upload_size_mb: 10
+  validate_magic_bytes: true
+  reject_empty_extraction: true
+  txt_encodings: ["utf-8", "utf-8-sig", "latin-1", "cp1252"]
+
+preprocessing:
+  lowercase: true
+  remove_urls: true
+  remove_non_ascii: true
+  normalize_whitespace: true
+
+parsing:
+  max_header_line_length: 60
+  min_sections_for_high_quality: 2
+  section_heading_keywords:
+    summary: ["summary", "profile", "objective", "about me", "professional summary", "career objective"]
+    experience: ["experience", "work experience", "employment", "professional experience", "work history", "employment history"]
+    education: ["education", "academic background", "academic", "qualifications", "education details"]
+    skills: ["skills", "technical skills", "core competencies", "expertise", "areas of expertise", "key skills"]
+    projects: ["projects", "personal projects", "academic projects", "key projects"]
+    certifications: ["certifications", "certificates", "licenses", "licenses & certifications"]
+    achievements: ["achievements", "awards", "honors", "accomplishments"]
+    publications: ["publications", "research publications"]
+    languages: ["languages", "language proficiency"]
+
+matching:
+  baseline:
+    vectorizer:
+      max_features: 2000
+      sublinear_tf: true
+      stop_words: "english"
+      ngram_range: [1, 1]
+    similarity_metric: "cosine"
+
+  hybrid_weights:
+    skill_weight: 0.35
+    experience_weight: 0.25
+    semantic_weight: 0.20
+    education_weight: 0.10
+    project_weight: 0.10
+
+embeddings:
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  batch_size: 32
+  cache_embeddings: true
+
+llm:
+  enabled: false
+  provider: "openai"
+  model: "gpt-4o-mini"
+  api_key_env: "OPENAI_API_KEY"
+  timeout_seconds: 30
+  max_retries: 2
+
+database:
+  url: "sqlite:///artifacts/resume_intelligence.db"
+
+ranking:
+  default_top_k: 10
+
+duplicates:
+  exact_hash_algorithm: "sha256"
+  near_duplicate_threshold: 0.95
+
+observability:
+  log_level: "INFO"
+  log_format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+
+responsible_ai:
+  exclude_from_scoring:
+    - name
+    - email
+    - phone
+    - gender
+    - age
+    - photo

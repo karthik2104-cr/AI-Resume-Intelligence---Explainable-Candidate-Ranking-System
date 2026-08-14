@@ -1,0 +1,460 @@
+# Shared skill vocabulary — used by resume and JD parsers
+# Keys are canonical skill names; values are known aliases.
+# This is the SINGLE source of truth for skill normalization.
+
+skills:
+  vocabulary:
+    Python:
+      - python
+      - python3
+      - "python 3"
+    JavaScript:
+      - javascript
+      - js
+      - ecmascript
+    TypeScript:
+      - typescript
+      - ts
+    Java:
+      - java
+    "C++":
+      - c++
+      - cpp
+    C:
+      - c lang
+      - c language
+    "C#":
+      - c#
+      - csharp
+      - "c sharp"
+    R:
+      - r language
+      - r programming
+    Go:
+      - go
+      - golang
+    Rust:
+      - rust
+      - rust lang
+    Scala:
+      - scala
+    Kotlin:
+      - kotlin
+    Swift:
+      - swift
+    Ruby:
+      - ruby
+    PHP:
+      - php
+    SQL:
+      - sql
+    MySQL:
+      - mysql
+    PostgreSQL:
+      - postgresql
+      - postgres
+      - psql
+    MongoDB:
+      - mongodb
+      - mongo
+    Redis:
+      - redis
+    SQLite:
+      - sqlite
+    Cassandra:
+      - cassandra
+      - apache cassandra
+    Elasticsearch:
+      - elasticsearch
+      - elastic search
+    "Scikit-learn":
+      - sklearn
+      - scikit-learn
+      - scikit learn
+    TensorFlow:
+      - tensorflow
+    PyTorch:
+      - pytorch
+      - torch
+    Keras:
+      - keras
+    XGBoost:
+      - xgboost
+    LightGBM:
+      - lightgbm
+      - lgbm
+    Django:
+      - django
+    Flask:
+      - flask
+    FastAPI:
+      - fastapi
+    "Spring Boot":
+      - spring boot
+      - springboot
+      - spring
+    "Node.js":
+      - nodejs
+      - node.js
+      - node js
+    Express:
+      - express
+      - expressjs
+      - express.js
+    React:
+      - react
+      - reactjs
+      - react.js
+    Angular:
+      - angular
+      - angularjs
+    Vue:
+      - vue
+      - vuejs
+      - vue.js
+    "REST APIs":
+      - rest api
+      - rest apis
+      - restful api
+      - restful apis
+      - restful
+    GraphQL:
+      - graphql
+    AWS:
+      - aws
+      - amazon web services
+    "Google Cloud":
+      - gcp
+      - google cloud platform
+      - google cloud
+    Azure:
+      - azure
+      - microsoft azure
+    Docker:
+      - docker
+    Kubernetes:
+      - kubernetes
+      - k8s
+    Terraform:
+      - terraform
+    Jenkins:
+      - jenkins
+    "CI/CD":
+      - ci/cd
+      - cicd
+      - ci cd
+      - continuous integration
+      - continuous deployment
+    "Machine Learning":
+      - machine learning
+      - ml
+    "Deep Learning":
+      - deep learning
+      - dl
+    NLP:
+      - nlp
+      - natural language processing
+    "Computer Vision":
+      - computer vision
+      - cv
+    Pandas:
+      - pandas
+    NumPy:
+      - numpy
+    Matplotlib:
+      - matplotlib
+    Spark:
+      - spark
+      - apache spark
+      - pyspark
+    Hadoop:
+      - hadoop
+      - apache hadoop
+    Kafka:
+      - kafka
+      - apache kafka
+    Airflow:
+      - airflow
+      - apache airflow
+    Git:
+      - git
+    Linux:
+      - linux
+      - unix
+    Bash:
+      - bash
+      - shell scripting
+      - shell script
+    Jupyter:
+      - jupyter
+      - jupyter notebook
+      - jupyter notebooks
+
+  skill_categories:
+    Python: Programming Languages
+    JavaScript: Programming Languages
+    TypeScript: Programming Languages
+    Java: Programming Languages
+    "C++": Programming Languages
+    C: Programming Languages
+    "C#": Programming Languages
+    R: Programming Languages
+    Go: Programming Languages
+    Rust: Programming Languages
+    Scala: Programming Languages
+    Kotlin: Programming Languages
+    Swift: Programming Languages
+    Ruby: Programming Languages
+    PHP: Programming Languages
+    SQL: Databases
+    MySQL: Databases
+    PostgreSQL: Databases
+    MongoDB: Databases
+    Redis: Databases
+    SQLite: Databases
+    Cassandra: Databases
+    Elasticsearch: Databases
+    "Scikit-learn": Machine Learning
+    TensorFlow: Machine Learning
+    PyTorch: Machine Learning
+    Keras: Machine Learning
+    XGBoost: Machine Learning
+    LightGBM: Machine Learning
+    "Machine Learning": Machine Learning
+    "Deep Learning": Machine Learning
+    NLP: Machine Learning
+    "Computer Vision": Machine Learning
+    Pandas: Data Science
+    NumPy: Data Science
+    Matplotlib: Data Science
+    Spark: Data Science
+    Hadoop: Data Science
+    Kafka: Data Engineering
+    Airflow: Data Engineering
+    Jupyter: Data Science
+    Django: Frameworks
+    Flask: Frameworks
+    FastAPI: Frameworks
+    "Spring Boot": Frameworks
+    "Node.js": Frameworks
+    Express: Frameworks
+    React: Web Technologies
+    Angular: Web Technologies
+    Vue: Web Technologies
+    "REST APIs": Web Technologies
+    GraphQL: Web Technologies
+    AWS: Cloud
+    "Google Cloud": Cloud
+    Azure: Cloud
+    Docker: DevOps
+    Kubernetes: DevOps
+    Terraform: DevOps
+    Jenkins: DevOps
+    "CI/CD": DevOps
+    Git: Tools
+    Linux: Tools
+    Bash: Tools
+
+  # Canonical soft skills vocabulary.
+  # Used by BOTH resume parser and JD parser — single source of truth.
+  soft_skills:
+    - communication
+    - leadership
+    - teamwork
+    - team work
+    - team player
+    - problem solving
+    - problem-solving
+    - collaboration
+    - collaborative
+    - analytical thinking
+    - critical thinking
+    - time management
+    - interpersonal skills
+    - presentation skills
+    - attention to detail
+    - adaptability
+    - creativity
+    - initiative
+    - self-motivated
+    - self motivated
+    - organizational skills
+    - conflict resolution
+    - negotiation
+    - mentoring
+    - coaching
+
+  # Explicit domain signals extracted from text.
+  # Only extracted when the domain phrase appears directly — no inference.
+  domains:
+    - artificial intelligence
+    - machine learning
+    - data science
+    - data engineering
+    - fintech
+    - financial technology
+    - healthcare
+    - health technology
+    - e-commerce
+    - ecommerce
+    - cybersecurity
+    - cyber security
+    - information security
+    - cloud computing
+    - web development
+    - mobile development
+    - game development
+    - blockchain
+    - natural language processing
+    - computer vision
+
+job_parsing:
+  max_header_line_length: 70
+  section_aliases:
+    about:
+      - about the role
+      - about this role
+      - role overview
+    description:
+      - job description
+      - position description
+      - overview
+    responsibilities:
+      - responsibilities
+      - key responsibilities
+      - what you'll do
+      - what you will do
+      - duties
+      - responsibilities and duties
+    requirements:
+      - requirements
+      - basic qualifications
+      - minimum qualifications
+    required_qualifications:
+      - required qualifications
+      - required skills
+      - must have
+      - minimum requirements
+      - essential qualifications
+    preferred_qualifications:
+      - preferred qualifications
+      - preferred skills
+      - nice to have
+      - good to have
+      - bonus qualifications
+      - desirable
+    qualifications:
+      - qualifications
+    education:
+      - education
+      - educational requirements
+    experience:
+      - experience
+      - experience requirements
+      - work experience
+    benefits:
+      - benefits
+      - perks
+      - what we offer
+
+  # Word/phrase signals indicating a REQUIRED skill.
+  required_phrases:
+    - must have
+    - must possess
+    - must know
+    - is required
+    - are required
+    - required
+    - mandatory
+    - minimum
+    - minimum of
+    - at least
+    - need to have
+    - needs to have
+    - should have
+    - essential
+    - required qualification
+    - you must
+
+  # Word/phrase signals indicating a PREFERRED skill.
+  preferred_phrases:
+    - is a plus
+    - is a bonus
+    - is a nice
+    - would be a plus
+    - would be an advantage
+    - experience with would be
+    - is plus
+    - is preferred
+    - are preferred
+    - preferred
+    - nice to have
+    - good to have
+    - desirable
+    - bonus
+    - ideally
+    - advantage
+    - an advantage
+    - a plus
+    - a bonus
+
+  seniority_levels:
+    - intern
+    - internship
+    - trainee
+    - junior
+    - entry level
+    - entry-level
+    - mid level
+    - mid-level
+    - senior
+    - lead
+    - principal
+    - staff
+    - manager
+    - director
+
+  employment_types:
+    - full-time
+    - full time
+    - part-time
+    - part time
+    - contract
+    - temporary
+    - freelance
+    - internship
+
+  work_modes:
+    - remote
+    - hybrid
+    - onsite
+    - on-site
+    - on site
+    - work from home
+    - wfh
+
+  degree_aliases:
+    bachelor:
+      - bachelor
+      - bachelor's
+      - b.tech
+      - b.e.
+      - b.e
+      - b.sc
+      - b.sc.
+      - bca
+      - undergraduate
+    master:
+      - master
+      - master's
+      - m.tech
+      - m.s.
+      - m.sc
+      - mba
+      - mca
+      - postgraduate
+    doctorate:
+      - ph.d
+      - phd
+      - doctorate
+      - doctoral
