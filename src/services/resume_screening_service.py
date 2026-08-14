@@ -15,6 +15,7 @@ from src.matching.semantic_matcher import SemanticMatcher
 from src.explainability.service import ExplanationService
 from src.explainability.models import ExplanationInput
 from src.embeddings import get_embedding_engine
+from src.retrieval.errors import DuplicateCandidateError
 from src.utils.config import get_settings
 
 
@@ -77,11 +78,11 @@ class ScreeningService:
 
         Returns a dict with keys: ranking_result, retrieval_results, explanations
         """
-        # Index candidates into retriever (caller may have already indexed; duplicates will raise)
+        # Index candidates into the retriever. Duplicate indexing is the one intentionally
+        # supported idempotent case; all other failures must surface.
         try:
             self.index_candidates(resumes, candidate_ids)
-        except Exception:
-            # If candidates already indexed, proceed — retriever will raise on duplicates, but we want idempotent behaviour
+        except DuplicateCandidateError:
             pass
 
         # JD embedding
