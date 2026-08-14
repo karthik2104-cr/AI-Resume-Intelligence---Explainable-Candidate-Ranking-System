@@ -17,6 +17,13 @@ from src.parsing.entry_extractors import (
     extract_experience_entries,
     extract_project_entries,
     extract_skills,
+    extract_achievements,
+    extract_publications,
+    extract_awards,
+    extract_languages,
+    extract_soft_skills,
+    extract_responsibilities,
+    detect_employment_location_workmode_notice,
 )
 from src.parsing.quality import assess_parsing_quality
 from src.parsing.section_splitter import section_content_by_type, split_into_sections
@@ -74,6 +81,47 @@ class HeuristicResumeParser(ResumeParser):
 
         years_experience = estimate_years_experience(experience)
 
+        # Advanced extraction
+        achievements_content = section_content_by_type(sections, ResumeSectionType.ACHIEVEMENTS)
+        publications_content = section_content_by_type(sections, ResumeSectionType.PUBLICATIONS)
+        languages_content = section_content_by_type(sections, ResumeSectionType.LANGUAGES)
+
+        achievements = extract_achievements(achievements_content) if achievements_content else []
+        publications = extract_publications(publications_content) if publications_content else []
+        languages = extract_languages(languages_content) if languages_content else []
+
+        # Soft skills are often listed in skills section; fall back to summary if missing
+        soft_skills = []
+        if skills_content:
+            soft_skills = extract_soft_skills(skills_content)
+        if not soft_skills and summary:
+            soft_skills = extract_soft_skills(summary)
+
+        # Responsibilities from experience blocks
+        responsibilities = []
+        if experience_content:
+            responsibilities = extract_responsibilities(experience_content)
+
+        # Domains: exact phrase matches from canonical domains list (no inference)
+        settings = get_settings()
+        domains: list[str] = []
+        text_lower = text.lower()
+        for d in settings.skills.domains:
+            if d.lower() in text_lower:
+                domains.append(d)
+
+        # Project technologies: consolidate project entry tech lists
+        project_technologies: list[str] = []
+        for p in projects:
+            for t in getattr(p, "technologies", []) or []:
+                if t and t not in project_technologies:
+                    project_technologies.append(t)
+
+        # Employment/location/work_mode/notice heuristics
+        employment_type, location, work_mode, notice_period = detect_employment_location_workmode_notice(
+            header_text + "\n" + text
+        )
+
         parsed = ParsedResume(
             name=contact.name,
             email=contact.email,
@@ -89,7 +137,19 @@ class HeuristicResumeParser(ResumeParser):
             years_experience=years_experience,
             raw_text=text,
             parsing_warnings=warnings,
+            achievements=achievements,
+            publications=publications,
+            languages=languages,
+            soft_skills=soft_skills,
+            domains=domains,
+            responsibilities=responsibilities,
+            employment_type=employment_type,
+            location=location,
+            work_mode=work_mode,
+            notice_period=notice_period,
+            project_technologies=project_technologies,
         )
+
         parsed.parsing_quality = assess_parsing_quality(parsed, self._config)
 
         logger.info(

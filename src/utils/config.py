@@ -85,24 +85,65 @@ class HybridWeightsConfig(BaseModel):
     project_weight: float = 0.10
 
 
+class HybridMatchingWeightsConfig(BaseModel):
+    required_skill_coverage: float = 0.35
+    preferred_skill_coverage: float = 0.10
+    semantic_similarity: float = 0.35
+    experience_compatibility: float = 0.10
+    education_compatibility: float = 0.05
+    seniority_compatibility: float = 0.05
+
+    def validate_weights(self) -> None:
+        # non-negative
+        for k, v in self.model_dump().items():
+            if v is None:
+                raise ValueError(f"Weight '{k}' is missing")
+            if v < 0:
+                raise ValueError(f"Weight '{k}' must be non-negative")
+        total = sum(self.model_dump().values())
+        if not (0.999 <= total <= 1.001):
+            raise ValueError(f"Hybrid matching weights must sum to 1.0 (got {total})")
+
+
+class HybridMatchingConfig(BaseModel):
+    weights: HybridMatchingWeightsConfig = Field(default_factory=HybridMatchingWeightsConfig)
+
+
 class MatchingConfig(BaseModel):
     baseline: BaselineMatchingConfig = Field(default_factory=BaselineMatchingConfig)
     hybrid_weights: HybridWeightsConfig = Field(default_factory=HybridWeightsConfig)
+    hybrid_matching: HybridMatchingConfig = Field(default_factory=HybridMatchingConfig)
 
 
 class EmbeddingsConfig(BaseModel):
+    enabled: bool = True
+    provider: str = "sentence_transformers"
     model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     batch_size: int = 32
+    normalize_embeddings: bool = True
     cache_embeddings: bool = True
+
+
+class SemanticMatchingWeights(BaseModel):
+    summary: float = 0.10
+    skills: float = 0.25
+    experience: float = 0.35
+    projects: float = 0.20
+    education: float = 0.10
+
+
+class SemanticMatchingConfig(BaseModel):
+    weights: SemanticMatchingWeights = Field(default_factory=SemanticMatchingWeights)
 
 
 class LLMConfig(BaseModel):
     enabled: bool = False
-    provider: str = "openai"
-    model: str = "gpt-4o-mini"
-    api_key_env: str = "OPENAI_API_KEY"
+    provider: str | None = None
+    model: str | None = None
+    api_key_env: str | None = None
     timeout_seconds: int = 30
     max_retries: int = 2
+    fallback_to_deterministic: bool = True
 
 
 class DatabaseConfig(BaseModel):
@@ -116,6 +157,13 @@ class RankingConfig(BaseModel):
 class DuplicatesConfig(BaseModel):
     exact_hash_algorithm: str = "sha256"
     near_duplicate_threshold: float = 0.95
+
+
+class RetrievalConfig(BaseModel):
+    enabled: bool = True
+    top_k: int = 20
+    similarity_metric: str = "cosine"
+    cache_enabled: bool = True
 
 
 class ObservabilityConfig(BaseModel):
@@ -160,10 +208,12 @@ class Settings(BaseModel):
     skills: SkillsConfig = Field(default_factory=SkillsConfig)
     job_parsing: JobParsingConfig = Field(default_factory=JobParsingConfig)
     matching: MatchingConfig = Field(default_factory=MatchingConfig)
+    semantic_matching: SemanticMatchingConfig = Field(default_factory=SemanticMatchingConfig)
     embeddings: EmbeddingsConfig = Field(default_factory=EmbeddingsConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     ranking: RankingConfig = Field(default_factory=RankingConfig)
+    retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
     duplicates: DuplicatesConfig = Field(default_factory=DuplicatesConfig)
     observability: ObservabilityConfig = Field(default_factory=ObservabilityConfig)
     responsible_ai: ResponsibleAIConfig = Field(default_factory=ResponsibleAIConfig)

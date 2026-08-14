@@ -56,3 +56,13 @@ class MatchResult(BaseModel):
     explanation: Optional[MatchExplanation] = None
     matcher_name: str = "unknown"
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class SemanticMatchResult(BaseModel):
+    semantic_similarity: float = 0.0
+    section_scores: dict[str, float] = Field(default_factory=dict)
+    embedding_model: Optional[str] = None
+    embedding_dimension: Optional[int] = None
+    normalized_embeddings: Optional[bool] = None
+    compared_sections: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)

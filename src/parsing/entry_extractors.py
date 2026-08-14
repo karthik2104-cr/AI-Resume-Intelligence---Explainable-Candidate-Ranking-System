@@ -253,3 +253,165 @@ def _current_year() -> int:
     from datetime import datetime
 
     return datetime.now().year
+
+
+# --- Phase 10: Additional deterministic extractors ---
+
+def _split_items_from_block(block: str) -> list[str]:
+    """Return list-like items from a block: bullets or comma-separated tokens."""
+    items: list[str] = []
+    # First try bullet lines
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    for line in lines:
+        cleaned = BULLET_LINE.sub("", line)
+        # Skip header-like lines that are just 'Achievements:'
+        if cleaned.lower().rstrip(":") in (
+            "achievements",
+            "awards",
+            "publications",
+            "languages",
+            "skills",
+            "technical skills",
+        ):
+            continue
+        # If the line looks like a list (commas / semicolon), split
+        parts = SKILL_SPLIT_PATTERN.split(cleaned)
+        for p in parts:
+            token = p.strip(" .-•*")
+            if token:
+                items.append(token)
+    return items
+
+
+def extract_achievements(content: str) -> list[str]:
+    """Extract achievement lines or bullets from the achievements section."""
+    items: list[str] = []
+    for block in split_into_blocks(content):
+        items.extend(_split_items_from_block(block))
+    # Deduplicate preserving order
+    seen = set()
+    result = []
+    for it in items:
+        key = it.lower()
+        if key not in seen:
+            seen.add(key)
+            result.append(it)
+    return result
+
+
+def extract_publications(content: str) -> list[str]:
+    """Extract publication entries (titles/refs) from a publications section."""
+    return extract_achievements(content)
+
+
+def extract_awards(content: str) -> list[str]:
+    """Extract awards/honors from an awards/achievements section."""
+    return extract_achievements(content)
+
+
+def extract_languages(content: str) -> list[str]:
+    """Extract language tokens from a languages section."""
+    tokens: list[str] = []
+    for block in split_into_blocks(content):
+        parts = SKILL_SPLIT_PATTERN.split(block)
+        for p in parts:
+            t = p.strip(" .-•*")
+            if t:
+                tokens.append(t)
+    # Deduplicate
+    seen = set()
+    result = []
+    for t in tokens:
+        key = t.lower()
+        if key not in seen:
+            seen.add(key)
+            result.append(t)
+    return result
+
+
+from src.utils.config import get_settings
+
+
+def extract_soft_skills(content: str) -> list[str]:
+    """Extract soft skills by matching against canonical soft_skills list in config."""
+    settings = get_settings()
+    canonical = {s.lower(): s for s in settings.skills.soft_skills}
+    tokens: list[str] = []
+    for block in split_into_blocks(content):
+        parts = SKILL_SPLIT_PATTERN.split(block)
+        for p in parts:
+            t = p.strip(" .-•*")
+            if not t:
+                continue
+            key = t.lower()
+            if key in canonical:
+                tokens.append(canonical[key])
+    # Deduplicate
+    seen = set()
+    result = []
+    for s in tokens:
+        k = s.lower()
+        if k not in seen:
+            seen.add(k)
+            result.append(s)
+    return result
+
+
+def extract_responsibilities(content: str) -> list[str]:
+    """Split responsibilities or description blocks into bullet/responsibility lines."""
+    items: list[str] = []
+    for block in split_into_blocks(content):
+        for line in block.splitlines():
+            cleaned = BULLET_LINE.sub("", line.strip())
+            if not cleaned:
+                continue
+            # Ignore plain headers
+            lower = cleaned.lower().rstrip(":")
+            if lower in ("responsibilities", "responsibilities and duties", "duties"):
+                continue
+            items.append(cleaned)
+    # Deduplicate preserving order
+    seen = set()
+    result = []
+    for it in items:
+        key = it.lower()
+        if key not in seen:
+            seen.add(key)
+            result.append(it)
+    return result
+
+
+def detect_employment_location_workmode_notice(text: str) -> tuple[str | None, str | None, str | None, str | None]:
+    """Detect employment_type, location, work_mode, notice_period from free text heuristically."""
+    settings = get_settings()
+    lower = text.lower()
+    employment = None
+    work_mode = None
+    location = None
+    notice = None
+
+    # employment types
+    for et in settings.job_parsing.employment_types:
+        if et.lower() in lower:
+            employment = et
+            break
+
+    # work mode
+    for wm in settings.job_parsing.work_modes:
+        if wm.lower() in lower:
+            work_mode = wm
+            break
+
+    # location: simple heuristics
+    m = re.search(r"(?:based in|location[:\s]|located in|based at)\s*([A-Za-z0-9,\-\s]+)", lower)
+    if m:
+        loc = m.group(1).strip()
+        # limit length
+        location = loc[:150]
+
+    # notice period
+    n = re.search(r"notice(?: period)?[:\s]*([\w\s\d\-]+)", lower)
+    if n:
+        notice = n.group(1).strip()[:80]
+
+    return employment, location, work_mode, notice

@@ -1,256 +1,206 @@
-# AI Resume Intelligence & Explainable Candidate Ranking System (V2)
+﻿# AI Resume Screening & Explainable AI
 
-**Version:** 2.0.0 (Phase 6 — Entity Intelligence & Skill Gap)
+## Overview
 
-V2 is a modular rebuild of the legacy resume screening prototype. The original system (`app.py`, notebook, pickle artifacts) remains **untouched** for reference.
-
----
+A modular resume screening pipeline that ingests PDF/DOCX/TXT documents, parses resumes and job descriptions, retrieves candidate shortlists via embeddings, ranks candidates with a hybrid scorer, and produces evidence-grounded explanations. Includes a FastAPI backend and Streamlit demo UI.
 
 ## Problem Statement
 
-Recruiters need to match candidates to job descriptions with **transparent, explainable scores** — not a single opaque percentage. V2 transforms a monolithic TF-IDF Streamlit prototype into a production-style AI/NLP pipeline with clear separation of concerns.
+Keyword-only and TF-IDF approaches miss semantic equivalence, cannot distinguish required vs preferred skills, and produce opaque scores with no explanation of ranking decisions.
 
----
+## Solution
 
-## V2 Architecture (Current Phase)
+A layered pipeline separates **retrieval** (who might be relevant) from **ranking** (how well they match) and adds a presentation-only explainability layer:
+
+| Layer | Responsibility |
+|-------|----------------|
+| Document Ingestion | PDF, DOCX, TXT → structured text |
+| Resume & JD Parsing | Sections, skills, experience, education |
+| Skill Normalization | Canonical skill mapping (e.g. sk-learn → scikit-learn) |
+| Semantic Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Candidate Retrieval | In-memory vector top-K shortlist |
+| Hybrid Ranking | TF-IDF + semantic + structured skill matching |
+| Explainability | Deterministic evidence narrative (optional LLM abstraction) |
+| FastAPI / Streamlit | Programmatic and interactive screening |
+
+## Architecture
 
 ```mermaid
-flowchart TB
-    subgraph legacy [Legacy — Untouched]
-        L1[app.py]
-        L2[resume_screening.ipynb]
-        L3[model.pkl / vectorizer.pkl]
-    end
-
-    subgraph v2 [V2 — Phase 2]
-        CFG[configs/config.yaml]
-        MODELS[src/models/ — Pydantic schemas]
-        IFACE[Abstract interfaces]
-        PRE[src/preprocessing/text_cleaner.py]
-        BASE[src/matching/tfidf_baseline.py]
-        RANK[src/ranking/tfidf_baseline.py]
-        TESTS[tests/unit/]
-    end
-
-    CFG --> BASE
-    PRE --> BASE
-    MODELS --> BASE
-    IFACE --> BASE
-    BASE --> RANK
-    BASE --> TESTS
+flowchart TD
+    Files[Resume / JD files] --> Ingest[Ingestion]
+    Ingest --> Parse[Parsing]
+    Parse --> Norm[Skill Normalization]
+    Norm --> Embed[Embeddings]
+    Embed --> Retrieve[Candidate Retrieval]
+    Retrieve --> TopK[Top-K Shortlist]
+    TopK --> Struct[Structured Matching]
+    TopK --> Sem[Semantic Matching]
+    Struct --> Hybrid[Hybrid Ranker]
+    Sem --> Hybrid
+    Hybrid --> Final[Final Ranking]
+    Final --> Explain[Explainability]
+    Explain --> API[FastAPI]
+    Explain --> UI[Streamlit]
 ```
 
-### Layer Responsibilities
+## Core Features
 
-| Layer | Status | Purpose |
-|-------|--------|---------|
-| `src/ingestion/` | **Implemented** | PDF/DOCX/TXT ingestion via factory |
-| `src/parsing/` | **Implemented** | Resume + JD parsers |
-| `src/preprocessing/` | **Implemented** | Configurable text cleaning |
-| `src/extraction/` | Stub | Skill/entity extraction (Phase 6) |
-| `src/embeddings/` | Interface only | Sentence embeddings (Phase 7) |
-| `src/matching/` | **Baseline implemented** | TF-IDF + cosine similarity |
-| `src/scoring/` | Interface only | Hybrid multi-signal scoring (Phase 8) |
-| `src/ranking/` | **Baseline implemented** | Candidate ranking by TF-IDF score |
-| `src/explainability/` | Interface only | Feature-based explanations (Phase 10) |
-| `src/llm/` | Interface only | Optional LLM summaries (Phase 13) |
-| `src/storage/` | Interface only | SQLite persistence (Phase 16) |
-| `api/` | Stub | FastAPI backend (Phase 14) |
-| `app/` | Stub | Streamlit frontend (Phase 15) |
+- Document ingestion (PDF, DOCX, TXT)
+- Resume and JD parsing with heuristic section detection
+- Skill normalization via shared ontology (`configs/skills.yaml`)
+- Semantic matching with section-aware embeddings
+- Structured matching and skill-gap analysis
+- Candidate retrieval (in-memory cosine similarity)
+- Hybrid ranking with configurable component weights
+- Explainability with deterministic fallback
+- Evaluation harness (Precision@K, Recall@K, MRR, NDCG@K)
+- FastAPI REST API
+- Streamlit demo UI
 
----
+## Matching Strategy
 
-## Supported Document Formats (Phase 3)
+| Signal | Engine | Purpose |
+|--------|--------|---------|
+| TF-IDF | `TfidfBaselineMatcher` | Lexical overlap baseline |
+| Semantic | `SemanticMatcher` | Section-aware embedding cosine similarity |
+| Structured | `compute_skill_gap()` | Required/preferred skill coverage |
+| Experience / Education / Seniority | `HybridRanker` | Rule-based compatibility scores |
+| Final score | `HybridRanker` | Weighted combination (authoritative) |
 
-V2 ingests resumes and job descriptions through a unified `Document` abstraction:
+**Why retrieval and ranking are separate:** Retrieval uses full-document embeddings for efficient top-K shortlisting over many candidates. Ranking runs detailed TF-IDF, semantic, and structured matching only on the shortlist. Retrieval similarity is stored in match metadata for explanations but does **not** replace the hybrid final score.
 
-| Format | Extension | Library | Notes |
-|--------|-----------|---------|-------|
-| PDF | `.pdf` | `pypdf` | Per-page extraction, encrypted PDF detection |
-| Word | `.docx` | `python-docx` | Paragraphs and table text |
-| Plain text | `.txt` | stdlib | UTF-8 with latin-1/cp1252 fallback |
+## Explainability
 
-```python
-from src.ingestion import ingest_document
+`ExplanationService` produces summaries, strengths, skill gaps, and interview focus areas from structured match evidence. A deterministic explainer always runs; an optional LLM abstraction exists but is disabled by default (`llm.enabled: false` in config).
 
-with open("resume.pdf", "rb") as f:
-    document = ingest_document(f.read(), filename="resume.pdf")
+**Explanations are presentation-only and never modify scores or ranking.**
 
-print(document.extracted_text)
-print(document.page_count)  # PDF pages; 1 for DOCX/TXT
+## Evaluation
+
+Run the controlled demonstration benchmark:
+
+```powershell
+python scripts/evaluate.py
 ```
 
-Validation (extension, size, magic bytes, empty content) is driven by `configs/config.yaml`.
+The included fixture is a small **controlled synthetic benchmark** for demonstration — not a production benchmark. Example output:
 
----
-
-## Resume Parsing (Phase 4)
-
-Structured parsing converts any ingested `Document` into a `ParsedResume`:
-
-```python
-from src.parsing import ingest_and_parse_resume
-
-parsed = ingest_and_parse_resume(file_bytes, filename="resume.pdf")
-print(parsed.name, parsed.skills, parsed.experience)
-print(parsed.parsing_quality)  # high | medium | low
+```
+Model           Precision@K  Recall@K  MRR    NDCG@K
+keyword_overlap 0.600        1.000     1.000  0.979
+tfidf_baseline  0.600        1.000     1.000  0.987
 ```
 
-Detected sections: Summary, Experience, Skills, Education, Projects, Certifications, Achievements, Publications, Languages.
+## API
 
-The parser is **format-agnostic** — it consumes `Document`, not raw files.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | Health check |
+| POST | `/api/screen` | Screen resumes against a job (multipart form) |
 
----
+**POST /api/screen** form fields: `job_text` (required), `job_title`, `resumes` (files), `top_k`, `explain`.
 
-## Job Description Parsing (Phase 5)
+## Streamlit
 
-Structured JD parsing produces `ParsedJobDescription` with required/preferred skills, evidence, and experience requirements:
-
-```python
-from src.parsing import parse_job_description
-
-jd = parse_job_description(jd_text)
-print(jd.title, jd.all_required_skill_names)
-print(jd.required_skills[0].evidence)  # source sentence preserved
+```powershell
+.\.venv\Scripts\streamlit.exe run app/streamlit_app.py
 ```
 
-See [docs/job_parsing.md](docs/job_parsing.md) for full documentation.
-
----
-
-## Entity Intelligence & Skill Gap (Phase 6)
-
-Resume and JD share one skill vocabulary. Deterministic gap analysis:
-
-```python
-from src.matching import compute_skill_gap
-from src.parsing import ingest_and_parse_resume, parse_job_description
-
-resume = ingest_and_parse_resume(file_bytes, "resume.pdf")
-job = parse_job_description(jd_text)
-gap = compute_skill_gap(resume, job)
-
-print(gap.required_skill_coverage)  # skill coverage % — not final match score
-print(gap.missing_required)
-```
-
-See [docs/entity_intelligence.md](docs/entity_intelligence.md).
-
----
-
-## Baseline Matching (TF-IDF)
-
-The V2 baseline reimplements the legacy notebook approach as a clean, testable module:
-
-1. Clean resume and JD text via `clean_text()`
-2. Vectorize JD + resumes together with `TfidfVectorizer` (shared vocabulary per batch)
-3. Compute cosine similarity
-4. Return structured `MatchResult` with component scores
-
-**Configuration** (`configs/config.yaml`):
-
-```yaml
-matching:
-  baseline:
-    vectorizer:
-      max_features: 2000
-      sublinear_tf: true
-      stop_words: "english"
-```
-
-This mirrors the legacy notebook parameters for fair comparison in later evaluation phases.
-
----
+Paste a job description, upload resume files, click **Screen Candidates**, and view ranked candidate cards with component score bars and expandable explanations. Contact details (email, phone) are stripped before display.
 
 ## Project Structure
 
 ```
 v2/
-├── app/                    # Streamlit UI (Phase 15)
-├── api/                    # FastAPI backend (Phase 14)
+├── app/
+│   └── streamlit_app.py
+├── configs/
+│   ├── config.yaml
+│   └── skills.yaml
+├── docs/
+├── scripts/
+│   ├── evaluate.py
+│   └── evaluate_semantic_vs_tfidf.py
 ├── src/
-│   ├── ingestion/          # PDF/DOCX/TXT ingestion (implemented)
-│   ├── parsing/            # Resume parser (implemented)
-│   ├── preprocessing/      # Text cleaning (implemented)
-│   ├── extraction/         # Entity extraction (Phase 6)
-│   ├── embeddings/         # Embedding engine ABC
-│   ├── matching/           # TF-IDF baseline (implemented)
-│   ├── scoring/            # Hybrid scorer ABC
-│   ├── ranking/            # TF-IDF ranker (implemented)
-│   ├── explainability/     # Explainer ABC
-│   ├── recommendations/    # Job recommendations (Phase 12)
-│   ├── llm/                # LLM service ABC
-│   ├── storage/            # Persistence ABC
-│   ├── models/             # Pydantic domain models
-│   └── utils/              # Config, logging
-├── configs/config.yaml
-├── tests/unit/
-├── docs/audit_report.md
-├── requirements.txt
-└── pyproject.toml
+│   ├── api/              # FastAPI app + routes
+│   ├── embeddings/
+│   ├── evaluation/
+│   ├── explainability/
+│   ├── extraction/
+│   ├── ingestion/
+│   ├── llm/              # Optional LLM abstraction
+│   ├── matching/
+│   ├── models/
+│   ├── parsing/
+│   ├── ranking/
+│   ├── retrieval/
+│   ├── services/         # ScreeningService
+│   └── utils/
+├── tests/
+├── Dockerfile
+├── pyproject.toml
+└── requirements.txt
 ```
-
----
 
 ## Installation
 
-```bash
+```powershell
 cd v2
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.\.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
----
+Use the project virtual environment for all commands below (`.venv\Scripts\python.exe` on Windows).
 
-## Running Tests
+## Running
 
-```bash
-cd v2
-pytest
+**Tests:**
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
----
+**Evaluation:**
+```powershell
+.\.venv\Scripts\python.exe scripts/evaluate.py
+```
 
-## Configuration
+**FastAPI:**
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn src.api.main:app --reload --port 8000
+```
 
-All settings live in `configs/config.yaml`. Environment variable overrides:
+**Streamlit:**
+```powershell
+.\.venv\Scripts\streamlit.exe run app/streamlit_app.py
+```
 
-| Variable | Effect |
-|----------|--------|
-| `OPENAI_API_KEY` | Enables LLM when implemented |
-| `DATABASE_URL` | Overrides SQLite path |
-| `APP_ENVIRONMENT` | Sets environment label |
-| `LOG_LEVEL` | Adjusts logging verbosity |
+## Docker
 
----
+Build and run the Streamlit demo:
 
-## Legacy System Limitations (Summary)
+```powershell
+docker build -t ai-resume-v2 .
+docker run -p 8501:8501 ai-resume-v2
+```
 
-See [docs/audit_report.md](docs/audit_report.md) for the full audit.
+Transformer models download at first use; they are not baked into the image.
 
-- Monolithic Streamlit app with global pickle loading
-- PDF-only, flat-text processing
-- No structured parsing, explainability, or batch ranking in UI
-- TF-IDF labeled as "semantic similarity" — it is bag-of-words matching
-- No tests, API, configuration, or evaluation framework
-- Duplicate rows in training data inflate classification accuracy
+## Limitations
 
----
+- In-memory retrieval only — all candidate vectors held in RAM
+- Pre-trained embeddings not fine-tuned on resume-specific data
+- Small controlled evaluation fixture — not production benchmarks
+- Text-layer PDFs only (scanned/image PDFs unsupported)
+- LLM explanations disabled by default
 
-## Next Phases
+## Future Improvements
 
-| Phase | Deliverable |
-|-------|---------------|
-| **3** | ~~Document ingestion (PDF, DOCX, TXT)~~ **Done** |
-| **4** | ~~Resume section parser~~ **Done** |
-| **5** | ~~Job description parser~~ **Done** |
-| **6** | Skill/entity extraction + normalization (shared vocabulary started) |
-| **7** | Sentence Transformer embeddings |
-| **8** | Hybrid scoring engine |
-
----
+1. Persistent vector store for production-scale candidate pools
+2. Domain-adapted embedding fine-tuning on resume/JD pairs
+3. Broader JD template support for diverse hiring formats
+4. Labelled evaluation dataset for proper benchmark reporting
 
 ## License
 
-Educational and portfolio use.
+Educational / portfolio use. Do not commit personal data (PII) to this repository.

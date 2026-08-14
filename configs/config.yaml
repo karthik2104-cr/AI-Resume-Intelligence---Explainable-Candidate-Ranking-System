@@ -56,21 +56,48 @@ matching:
     education_weight: 0.10
     project_weight: 0.10
 
+  hybrid_matching:
+    weights:
+      required_skill_coverage: 0.35
+      preferred_skill_coverage: 0.10
+      semantic_similarity: 0.35
+      experience_compatibility: 0.10
+      education_compatibility: 0.05
+      seniority_compatibility: 0.05
+
 embeddings:
+  enabled: true
+  provider: "sentence_transformers"
   model_name: "sentence-transformers/all-MiniLM-L6-v2"
   batch_size: 32
+  normalize_embeddings: true
   cache_embeddings: true
+
+semantic_matching:
+  weights:
+    summary: 0.10
+    skills: 0.25
+    experience: 0.35
+    projects: 0.20
+    education: 0.10
 
 llm:
   enabled: false
-  provider: "openai"
-  model: "gpt-4o-mini"
-  api_key_env: "OPENAI_API_KEY"
+  provider: null
+  model: null
+  api_key_env: null
   timeout_seconds: 30
   max_retries: 2
+  fallback_to_deterministic: true
 
 database:
   url: "sqlite:///artifacts/resume_intelligence.db"
+
+retrieval:
+  enabled: true
+  top_k: 20
+  similarity_metric: cosine
+  cache_enabled: true
 
 ranking:
   default_top_k: 10

@@ -82,6 +82,20 @@ class ParsedResume(BaseModel):
     parsing_quality: str = "unknown"  # high | medium | low | unknown
     parsing_warnings: list[str] = Field(default_factory=list)
 
+    # Phase 10 — advanced extraction fields (optional, backward compatible)
+    achievements: list[str] = Field(default_factory=list)
+    publications: list[str] = Field(default_factory=list)
+    awards: list[str] = Field(default_factory=list)
+    languages: list[str] = Field(default_factory=list)
+    soft_skills: list[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
+    responsibilities: list[str] = Field(default_factory=list)
+    employment_type: Optional[str] = None
+    location: Optional[str] = None
+    work_mode: Optional[str] = None
+    notice_period: Optional[str] = None
+    project_technologies: list[str] = Field(default_factory=list)
+
     @property
     def full_text_for_matching(self) -> str:
         """Concatenated text used for baseline/semantic matching."""
