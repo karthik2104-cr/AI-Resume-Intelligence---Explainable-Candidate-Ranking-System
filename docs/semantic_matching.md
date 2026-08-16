@@ -1,71 +1,43 @@
-Semantic Matching (Phase 7)
+# Semantic Matching
 
-Overview
---------
-This document describes the semantic embedding matching layer added in Phase 7.
+## Overview
 
-Why TF-IDF is insufficient
---------------------------
-TF-IDF measures lexical overlap and can fail to capture semantic similarity when
-phrasing differs. For example, "scikit-learn" vs "sklearn" or "built models"
-vs "developed predictive models" may present low lexical overlap but high
-semantic similarity.
+Semantic matching complements TF-IDF lexical overlap with embedding cosine
+similarity so paraphrases and related skills can still score highly.
 
-What embeddings provide
------------------------
-Dense vector representations capture semantic meaning. Cosine similarity between
-vectors reflects semantic relatedness beyond exact token overlap.
+## Why TF-IDF alone is insufficient
 
-Selected model
---------------
-sentence-transformers/all-MiniLM-L6-v2 (default)
+TF-IDF measures lexical overlap and can miss semantic equivalence when wording
+differs (for example "built predictive models" vs "developed ML pipelines").
 
-This model is lightweight, CPU-friendly, and practical for local development.
+## Model
 
-Architecture
-------------
-Resume/JD parsed -> Entity Intelligence -> Semantic Text Builder -> Embedding
-Model -> Semantic Representation -> Semantic Matcher
+Default: `sentence-transformers/all-MiniLM-L6-v2` — lightweight and CPU-friendly.
 
-Section-aware representation
-----------------------------
-We build embeddings for meaningful sections rather than a single document
-embedding. Resume sections: summary, skills, experience, projects, education.
-JD sections: title, requirements (required+preferred), responsibilities,
-experience, education.
+Configured in `configs/config.yaml` under `embeddings`.
 
-Cosine similarity
------------------
-Cosine similarity (implemented defensively) is used for comparisons. When
-enabled, embeddings are L2-normalized which lets dot-product equal cosine.
+## How it works
 
-Weighting and missing sections
-------------------------------
-Semantic section weights are configurable in config.yaml and in the
-EmbeddingsConfig/SemanticMatchingConfig objects. Missing sections are handled by
-normalizing weights over only the available sections so missing data doesn't
-bias results.
+1. Build section texts from the parsed resume and JD.
+2. Embed sections with the shared singleton embedding engine.
+3. Compare mapped resume↔JD sections with cosine similarity.
+4. Aggregate with configurable section weights (`semantic_matching.weights`).
+5. Missing sections redistribute weight over available sections only.
 
-Caching
--------
-A simple optional in-memory cache prevents recomputing embeddings for identical
-texts within a process. This is configurable via the embeddings.cache_embeddings
-setting.
+The result populates `MatchResult.scores.semantic` and metadata; it does **not**
+set the final ranking score. `HybridRanker` consumes the semantic signal as one
+component among skill coverage, experience, education, and seniority.
 
-Evaluation methodology
-----------------------
-A small controlled fixture (tests/fixtures/matching_pairs.py) is provided to
-compare TF-IDF baseline vs semantic embeddings using simple metrics (mean
-similarity by class, Spearman where applicable). This is a demonstration, not a
-production benchmark.
+## Caching / lifecycle
 
-Limitations
------------
-- Local model download is required on first run. Tests avoid mandatory downloads
-  by mocking the encoder where possible.
-- The cache is in-memory and not persistent across processes.
-- No hybrid scoring is performed in Phase 7; semantic scores remain an
-  independent signal.
+- `get_embedding_engine()` returns a process-level singleton per provider.
+- `SentenceTransformerEmbedding` optionally caches identical input texts in memory
+  (`embeddings.cache_embeddings`).
 
-See src/matching/semantic_matcher.py and src/embeddings/sentence_transformers.py
-for implementation details.
+## Limitations
+
+- First run downloads the model.
+- In-memory text cache is not shared across processes.
+- Section heuristics depend on parsing quality.
+
+See `src/matching/semantic_matcher.py` and `src/embeddings/sentence_transformers.py`.

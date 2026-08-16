@@ -173,9 +173,23 @@ class HybridRanker(RankingEngine):
                 explanation=None,
                 metadata={"applied_weights": applied_weights, "configured_weights": weights},
             )
-            # attach hybrid result into match metadata for downstream inspection
-            match.metadata.setdefault("hybrid", {})
+            # Attach hybrid result for explainability / debugging
             match.metadata["hybrid"] = hybrid.model_dump()
+
+            # Surface presentation fields on MatchResult so API/UI do not dig into hybrid.
+            match.scores.overall = overall
+            match.scores.skill = required_score
+            match.scores.experience = experience_score
+            match.scores.education = education_score
+            if semantic_score is not None:
+                match.scores.semantic = semantic_score
+
+            match.metadata["matched_skills"] = [
+                e.skill for e in (skill_gap.matched_required + skill_gap.matched_preferred)
+            ]
+            match.metadata["missing_required_skills"] = [e.skill for e in skill_gap.missing_required]
+            match.metadata["missing_preferred_skills"] = [e.skill for e in skill_gap.missing_preferred]
+            match.metadata["parsing_quality"] = getattr(resume, "parsing_quality", None)
 
             hybrid_results.append(hybrid)
 

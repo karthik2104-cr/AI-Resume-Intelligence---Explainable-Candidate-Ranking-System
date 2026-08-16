@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-import math
 import numpy as np
 
 from src.retrieval.base import CandidateRetriever
@@ -13,7 +12,6 @@ from src.retrieval.errors import (
     DuplicateCandidateError,
     EmbeddingDimensionMismatchError,
 )
-from src.embeddings.cache import EmbeddingCache
 
 
 class InMemoryCandidateRetriever(CandidateRetriever):
@@ -21,14 +19,12 @@ class InMemoryCandidateRetriever(CandidateRetriever):
 
     - Deterministic behavior: sorting ties by candidate_id
     - Validates embeddings for NaN/inf and consistent dimensionality
-    - Uses an internal embedding cache keyed by candidate_id
     """
 
     def __init__(self):
         self._records: Dict[str, CandidateRecord] = {}
         self._embeddings: Dict[str, np.ndarray] = {}
         self._dim: Optional[int] = None
-        self._cache = EmbeddingCache()
 
     def index(self, record: CandidateRecord) -> None:
         cid = record.candidate_id
@@ -56,7 +52,6 @@ class InMemoryCandidateRetriever(CandidateRetriever):
         # store a defensive copy
         self._records[cid] = CandidateRecord(candidate_id=cid, embedding=vec.tolist(), metadata=record.metadata)
         self._embeddings[cid] = vec.copy()
-        self._cache.set(cid, vec.copy())
 
     def retrieve(self, query_embedding, top_k: int = 10) -> List[RetrievalResult]:
         if top_k <= 0:
@@ -110,7 +105,6 @@ class InMemoryCandidateRetriever(CandidateRetriever):
     def clear(self) -> None:
         self._records.clear()
         self._embeddings.clear()
-        self._cache.clear()
         self._dim = None
 
     def count(self) -> int:

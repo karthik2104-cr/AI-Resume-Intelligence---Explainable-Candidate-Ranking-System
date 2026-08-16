@@ -14,7 +14,7 @@ from src.models.matching import MatchResult, ComponentScores, SemanticMatchResul
 from src.models.resume import ParsedResume
 from src.models.job import ParsedJobDescription
 from src.utils.config import get_settings
-from src.embeddings import get_embedding_engine
+from src import embeddings as embeddings_mod
 
 
 def _build_resume_sections(resume: ParsedResume) -> Dict[str, str]:
@@ -77,7 +77,7 @@ class SemanticMatcher(MatchingEngine):
         self._settings = get_settings()
         if not self._settings.embeddings.enabled:
             raise RuntimeError("Embeddings are disabled in configuration")
-        self._engine = get_embedding_engine()
+        self._engine = embeddings_mod.get_embedding_engine()
         # load section weights from configuration; provide sensible defaults if missing
         if hasattr(self._settings, "semantic_matching") and getattr(self._settings, "semantic_matching") is not None:
             self._weights = self._settings.semantic_matching.weights.model_dump()
@@ -92,15 +92,12 @@ class SemanticMatcher(MatchingEngine):
     def _safe_cosine(self, a: np.ndarray, b: np.ndarray) -> float:
         if a is None or b is None:
             return 0.0
-        if a.size == 0 or b.size == 0:
-            return 0.0
-        # if embeddings are normalized, dot product equals cosine
         try:
-            # cast to float
             a = np.asarray(a, dtype=float)
             b = np.asarray(b, dtype=float)
+            if a.size == 0 or b.size == 0:
+                return 0.0
             if a.shape != b.shape:
-                # pad smaller with zeros (unlikely)
                 min_len = min(a.size, b.size)
                 a = a[:min_len]
                 b = b[:min_len]
@@ -170,7 +167,7 @@ class SemanticMatcher(MatchingEngine):
         sem = SemanticMatchResult(
             semantic_similarity=float(overall),
             section_scores=section_scores,
-            embedding_model=self._engine.model_name,
+            embedding_model=getattr(self._engine, "model_name", None),
             embedding_dimension=getattr(self._engine, "_dim", None),
             normalized_embeddings=getattr(self._engine, "_normalize", None),
             compared_sections=list(section_scores.keys()),

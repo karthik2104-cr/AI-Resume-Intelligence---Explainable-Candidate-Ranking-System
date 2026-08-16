@@ -6,9 +6,8 @@ from src.utils.config import get_settings
 
 
 def create_app() -> FastAPI:
-    # Configure structured logging early using configured level
     settings = get_settings()
-    level = getattr(settings.logging, "level", "INFO") if hasattr(settings, "logging") else "INFO"
+    level = getattr(settings.observability, "log_level", "INFO")
     configure_logging(level=level)
 
     app = FastAPI(title="AI Resume Screening V2")

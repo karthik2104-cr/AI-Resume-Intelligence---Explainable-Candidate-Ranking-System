@@ -1,49 +1,38 @@
-Retrieval Layer (Phase 10)
+# Retrieval Layer
 
-Overview
---------
+## Overview
+
 The retrieval layer provides a lightweight, in-memory candidate retriever that
 produces a top-K shortlist of potentially relevant candidates for a given job
 embedding. Retrieval is intentionally separate from detailed ranking — it is a
-fast filtering step that reduces the candidate set that the hybrid ranker will
-score in detail.
+fast filtering step that reduces the candidate set the hybrid ranker scores
+in detail.
 
-Key principles
---------------
-- Retrieval is NOT final ranking. The hybrid ranker remains authoritative.
-- Retrieval uses semantic embeddings (via the existing EmbeddingEngine).
-- Retrieval stores only lightweight metadata (no PII such as email or phone).
-- The implementation is behind an interface so a future vector DB (FAISS, Pinecone)
-  can be substituted without changing the application logic.
+## Key principles
 
-Files added
------------
-- src/retrieval/base.py — CandidateRetriever interface
-- src/retrieval/models.py — Pydantic models for CandidateRecord and RetrievalResult
-- src/retrieval/in_memory.py — InMemoryCandidateRetriever implementation
-- src/retrieval/errors.py — Domain exceptions
-- src/embeddings/cache.py — Simple embedding cache wrapper
-- docs/retrieval.md — this document
+- Retrieval is **not** final ranking. `HybridRanker` remains authoritative.
+- Retrieval uses semantic embeddings via the existing `EmbeddingEngine`.
+- Retrieval stores only lightweight metadata (no email or phone).
+- The implementation is behind an interface so a future vector store can be
+  substituted without changing application logic.
 
-How it integrates
------------------
-1. The application obtains a JD embedding from the existing embedding engine.
-2. The retriever is given the query embedding and returns top-K candidate ids
-   with retrieval similarities and lightweight metadata.
-3. The application passes the shortlisted ParsedResume objects into the
-   existing matching/ranking pipeline (semantic matcher and hybrid ranker).
-4. Retrieval similarity is preserved in RetrievalResult.metadata and does not
-   overwrite or replace MatchResult scores.
+## Files
 
-Limitations
------------
-- This is an in-memory retriever intended for development, testing, and small
-  scale. It is not a production vector DB.
-- Persistence, sharding, and large-scale performance are out of scope for Phase 10.
-- The retriever requires embeddings to be provided at indexing time.
+- `src/retrieval/base.py` — `CandidateRetriever` interface
+- `src/retrieval/models.py` — `CandidateRecord`, `RetrievalResult`
+- `src/retrieval/in_memory.py` — `InMemoryCandidateRetriever`
+- `src/retrieval/errors.py` — domain exceptions
 
-Next steps
-----------
-- Add integration wiring that produces JD embedding and calls the retriever.
-- Add optional serialization for the retriever index (if persistence is desired).
-- Implement a FAISS-backed retriever behind the same interface for larger datasets.
+## How it integrates
+
+1. `ScreeningService` embeds the JD via the embedding engine.
+2. The retriever returns top-K candidate IDs with cosine similarities.
+3. Shortlisted resumes enter TF-IDF + semantic matching and hybrid ranking.
+4. Retrieval similarity is attached to match metadata for evidence only and
+   never overwrites hybrid scores.
+
+## Limitations
+
+- In-memory only — suitable for demos, tests, and small candidate pools.
+- Embeddings must be provided at indexing time.
+- Not a production vector database (no persistence or sharding).

@@ -17,7 +17,7 @@ class MatchRequest(BaseModel):
 
 
 class ComponentScores(BaseModel):
-    """Decomposed scoring components (populated by hybrid scorer in later phases)."""
+    """Decomposed scoring components populated by matchers and HybridRanker."""
 
     overall: float = 0.0
     skill: Optional[float] = None

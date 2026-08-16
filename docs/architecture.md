@@ -26,12 +26,12 @@ flowchart TD
 | Ingestion | `src/ingestion/` | PDF, DOCX, TXT → `Document` |
 | Parsing | `src/parsing/` | Resume/JD section and skill extraction |
 | Extraction | `src/extraction/` | Skill normalization, entity profiles |
-| Embeddings | `src/embeddings/` | Sentence-transformer encoding + disk cache |
+| Embeddings | `src/embeddings/` | Sentence-transformer encoding + singleton lifecycle |
 | Retrieval | `src/retrieval/` | Top-K shortlist by vector similarity |
 | Matching | `src/matching/` | TF-IDF baseline, semantic similarity, skill gap |
 | Ranking | `src/ranking/` | `HybridRanker` — authoritative final score |
 | Explainability | `src/explainability/` | Deterministic + optional LLM narrative |
-| Services | `src/services/` | `ScreeningService` orchestration |
+| Services | `src/services/` | `ScreeningService` + shared document pipeline |
 | API | `src/api/` | FastAPI `/api/health`, `/api/screen` |
 | UI | `app/streamlit_app.py` | Streamlit demo |
 

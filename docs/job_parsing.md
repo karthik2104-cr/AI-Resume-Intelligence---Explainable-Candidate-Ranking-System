@@ -1,4 +1,4 @@
-# Job Description Parsing (Phase 5)
+# Job Description Parsing
 
 ## Overview
 
@@ -11,7 +11,7 @@ HeuristicJobDescriptionParser
         ↓
 ParsedJobDescription
         ↓
-Future Matching Engine
+Skill Normalization / Matching / Ranking
 ```
 
 ## Supported Sections

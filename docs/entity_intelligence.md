@@ -1,8 +1,10 @@
-# Entity Intelligence & Skill Gap Analysis (Phase 6)
+# Entity Intelligence & Skill Gap Analysis
 
 ## Overview
 
-Phase 6 unifies skill normalization across resumes and job descriptions, then computes deterministic skill gap analysis — without embeddings, LLMs, or final match scores.
+Skill normalization is shared across resumes and job descriptions. Deterministic
+skill-gap analysis compares candidate skills to required/preferred JD skills
+without embeddings, LLMs, or final match scores.
 
 ```
 ParsedResume → EntityExtractor → Candidate Profile ─┐
@@ -116,6 +118,7 @@ print(gap.missing_required)
 4. Soft skills extracted separately; excluded from technical gap by default
 5. Coverage metrics are skill-set only — not experience, education, or semantic fit
 
-## Next Phase
+## Related
 
-Phase 7 adds sentence embeddings for semantic matching while retaining this deterministic gap layer for explainability.
+Semantic matching adds sentence embeddings while retaining this deterministic
+gap layer for explainability.

@@ -4,13 +4,18 @@ Presentation layer only — all screening logic is delegated to ScreeningService
 """
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path when launched via `streamlit run app/...`
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import streamlit as st
 
-from src.ingestion.factory import IngestionFactory
-from src.parsing.job_parser import parse_job_description
-from src.parsing.resume_parser import HeuristicResumeParser
+from src.services.document_pipeline import parse_resume_bytes, parse_job
 from src.services.resume_screening_service import ScreeningService
-from src.utils.config import get_settings
 
 
 def mask_name(name: str | None) -> str:
@@ -48,6 +53,27 @@ def render_explanation(explanation: dict) -> None:
         st.markdown("**Interview focus**")
         for item in focus[:5]:
             st.markdown(f"- {item}")
+
+
+def _skills_from_entry(meta: dict) -> tuple[list, list]:
+    matched = meta.get("matched_skills")
+    missing_req = meta.get("missing_required_skills")
+    if matched is not None and missing_req is not None:
+        return matched, missing_req
+
+    skill_gap = (meta.get("hybrid") or {}).get("skill_gap") or {}
+    if matched is None:
+        matched = [
+            e.get("skill") if isinstance(e, dict) else str(e)
+            for e in (skill_gap.get("matched_required") or [])
+            + (skill_gap.get("matched_preferred") or [])
+        ]
+    if missing_req is None:
+        missing_req = [
+            e.get("skill") if isinstance(e, dict) else str(e)
+            for e in (skill_gap.get("missing_required") or [])
+        ]
+    return matched or [], missing_req or []
 
 
 def main() -> None:
@@ -100,31 +126,22 @@ def main() -> None:
         st.error("Please upload at least one resume.")
         return
 
-    settings = get_settings()
-    settings.retrieval.top_k = int(top_k)
-
-    ingester = IngestionFactory()
-    parser = HeuristicResumeParser()
     parsed_resumes = []
     candidate_ids = []
 
     with st.spinner("Parsing resumes and running screening pipeline…"):
         for i, up in enumerate(uploaded):
             try:
-                raw = up.read()
-                doc = ingester.ingest(raw, up.name)
-                parsed = parser.parse(doc)
-                parsed.email = None
-                parsed.phone = None
+                parsed = parse_resume_bytes(up.read(), up.name, strip_pii=True)
                 parsed_resumes.append(parsed)
                 candidate_ids.append(f"cand_{i}")
             except Exception as exc:
                 st.error(f"Could not process **{up.name}**: {exc}")
                 return
 
-        job = parse_job_description(job_text, title=job_title or None)
+        job = parse_job(job_text, title=job_title or None)
         svc = ScreeningService()
-        out = svc.screen(job, parsed_resumes, candidate_ids=candidate_ids)
+        out = svc.screen(job, parsed_resumes, candidate_ids=candidate_ids, top_k=int(top_k))
 
     ranking = out.get("ranking_result")
     explanations = out.get("explanations") if show_explanations else None
@@ -164,8 +181,7 @@ def main() -> None:
                 score_bar("Experience", getattr(mr.scores, "experience", 0.0))
 
             meta = mr.metadata or {}
-            matched = meta.get("matched_skills") or []
-            missing_req = meta.get("missing_required_skills") or []
+            matched, missing_req = _skills_from_entry(meta)
             retrieval = meta.get("retrieval") or {}
 
             detail_cols = st.columns(2)

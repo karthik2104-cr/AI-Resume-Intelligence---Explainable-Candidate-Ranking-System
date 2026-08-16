@@ -15,6 +15,10 @@ def patch_embedding(monkeypatch):
         def embed_texts(self, texts):
             return [self.embed_text(t) for t in texts]
 
+        @property
+        def model_name(self):
+            return "mock"
+
     import src.embeddings as emb
 
     monkeypatch.setattr(emb, "get_embedding_engine", lambda: MockEmbeddingEngine())

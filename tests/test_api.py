@@ -13,6 +13,10 @@ class MockEmbeddingEngine:
     def embed_texts(self, texts):
         return [self.embed_text(t) for t in texts]
 
+    @property
+    def model_name(self):
+        return "mock"
+
 
 @pytest.fixture(autouse=True)
 def patch_embedding(monkeypatch):

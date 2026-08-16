@@ -44,7 +44,7 @@ class FakeEngine:
 
 def test_semantic_matcher_basic(monkeypatch):
     # monkeypatch the engine factory to return fake engine
-    monkeypatch.setattr("src.matching.semantic_matcher.get_embedding_engine", lambda: FakeEngine())
+    monkeypatch.setattr("src.embeddings.get_embedding_engine", lambda: FakeEngine())
 
     matcher = SemanticMatcher()
 
